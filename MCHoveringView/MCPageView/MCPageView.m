@@ -21,7 +21,7 @@ static CGFloat const scale = 0.1;
 @property (nonatomic , strong) MCItem * lastItem;
 @property (nonatomic , strong) UIView  * lineView;
 @property (nonatomic , assign) CGFloat  titleScrollHeight;
-
+@property (nonatomic , assign) CGFloat  defaultTitleBtnWidth;
 //记录外面传进来的RGB的值
 @property (nonatomic , assign) CGFloat  defaultR,defaultG,defaultB,defaultA,selectedR,selectedG,selectedB,selectedA;
 @property (nonatomic , strong) UIColor *netxColor ;
@@ -32,8 +32,6 @@ static CGFloat const scale = 0.1;
 @end
 
 static const NSInteger itemTag = 100;
-/**titleButton的最小宽度*/
-static const NSInteger  minTitleButtonWitdh = 60;
 @implementation MCPageView
 
 - (instancetype)initWithFrame:(CGRect)frame titles:(NSArray *)titles controllers:(NSArray *)controllers
@@ -42,6 +40,7 @@ static const NSInteger  minTitleButtonWitdh = 60;
         self.contentTitles = [NSArray arrayWithArray:titles];
         _contentCtrollers = [NSArray arrayWithArray:controllers];
         self.itemArray = [NSMutableArray array];
+        _defaultTitleBtnWidth = (self.frame.size.width)/titles.count;
         //titleView 的初始化高度
         _titleScrollHeight = 50;
         //初始化横线的宽度是title的一半
@@ -71,10 +70,7 @@ static const NSInteger  minTitleButtonWitdh = 60;
 {
     UIViewController *childVC = self.contentCtrollers[indexPath.item];
     childVC.view.frame = cell.contentView.bounds;
-    [cell.contentView.subviews makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    if (![cell.contentView.subviews containsObject:childVC.view]) {
-        [cell.contentView addSubview:childVC.view];
-    }
+    [cell.contentView addSubview:childVC.view];
 }
 //将要加载头尾视图时调用的方法
 - (void)collectionView:(UICollectionView *)collectionView willDisplaySupplementaryView:(UICollectionReusableView *)view forElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
@@ -218,7 +214,11 @@ static const NSInteger  minTitleButtonWitdh = 60;
     if (self.lastItem) {
         self.lastItem.titleLabel.font = self.defaultTitleFont ?self.defaultTitleFont:[UIFont systemFontOfSize:14];
         [self.lastItem setTitleColor:self.defaultTitleColor ?self.defaultTitleColor:itemDefaultColor forState:UIControlStateNormal];
+        self.lastItem.transform = CGAffineTransformMakeScale(1,1);
+
     }
+    Item.transform = CGAffineTransformMakeScale(1+ scale,1+ scale);
+
     self.lastIndex = index;
     self.lastItem = Item;
     Item.titleLabel.font = self.selectTitleFont ?self.selectTitleFont:[UIFont systemFontOfSize:14];
@@ -256,11 +256,20 @@ static const NSInteger  minTitleButtonWitdh = 60;
     }
     self.isClick = NO;
     [UIView animateWithDuration:0.3 animations:^{
-        self.lineView.center = item.center;
-        self.lineView.bottom = item.bottom -1;
+        self.lineView.centerX = self.titleButtonWidth *(0.5 + (item.tag -itemTag));
     }];
 }
 
+- (void)setMarginToLfet:(CGFloat)marginToLfet
+{
+    _marginToLfet = marginToLfet;
+    self.titleScroll.frame = CGRectMake(_marginToLfet, _marginToRight, kwidth  - _marginToRight - _marginToLfet, self.titleScrollHeight);
+}
+- (void)setMarginToRight:(CGFloat)marginToRight
+{
+    _marginToRight = marginToRight;
+    self.titleScroll.frame = CGRectMake(_marginToLfet, _marginToRight, kwidth  - _marginToRight - _marginToLfet, self.titleScrollHeight);
+}
 /**设置选中title字体*/
 - (void)setSelectTitleFont:(UIFont *)selectTitleFont
 {
@@ -324,16 +333,16 @@ static const NSInteger  minTitleButtonWitdh = 60;
 /**设置选中titlebtn的宽度*/
 - (void)setTitleButtonWidth:(CGFloat)titleButtonWidth
 {
-    _titleButtonWidth = titleButtonWidth;
-    //取最小值minTitleButtonWitdh
-    if (_titleButtonWidth < minTitleButtonWitdh) {
-        _titleButtonWidth = minTitleButtonWitdh;
+    if (titleButtonWidth < 10) {
+        NSLog(@"**设置的宽度太小，请重新设置**");
+        return;
     }
-    //如果给的宽度与title个数乘积小于屏幕宽度   则无效  。取平分屏幕
+    _titleButtonWidth = titleButtonWidth;
+
+    //如果给的宽度与title个数乘积小于屏幕宽度
     if ((_titleButtonWidth *_contentTitles.count) >kwidth) {
         self.titleScroll.contentSize = CGSizeMake((_titleButtonWidth *_contentTitles.count), self.titleScrollHeight);
     }else{
-        _titleButtonWidth = kwidth/(self.itemArray.count);
         self.titleScroll.contentSize = CGSizeMake(kwidth, self.titleScrollHeight);
     }
     __weak __typeof(&*self)weakSelf = self;
@@ -392,9 +401,9 @@ static const NSInteger  minTitleButtonWitdh = 60;
         
         _titleButtonWidth = kwidth/_contentTitles.count;
         //最小值与个数乘积还大与屏幕的话 就按60宽度算
-        if (_contentTitles.count * minTitleButtonWitdh > kwidth) {
-            _titleButtonWidth = minTitleButtonWitdh;
-            self.titleScroll.contentSize = CGSizeMake((minTitleButtonWitdh *_contentTitles.count), self.titleScrollHeight);
+        if (_contentTitles.count * _defaultTitleBtnWidth > kwidth) {
+            _titleButtonWidth = _defaultTitleBtnWidth;
+            self.titleScroll.contentSize = CGSizeMake((_defaultTitleBtnWidth *_contentTitles.count), self.titleScrollHeight);
         }else{
             self.titleScroll.contentSize = CGSizeMake(kwidth, self.titleScrollHeight);
         }
@@ -481,4 +490,3 @@ static const NSInteger  minTitleButtonWitdh = 60;
 }
 
 @end
-

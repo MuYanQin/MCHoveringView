@@ -17,6 +17,16 @@
 @property (nonatomic , assign) id<MCPageViewDelegate>  delegate;
 
 /**
+右边距离屏幕的距离 默认0
+*/
+@property (nonatomic , assign) CGFloat  marginToRight;
+
+/**
+ 左边距离屏幕的距离 默认0
+ */
+@property (nonatomic , assign) CGFloat  marginToLfet;
+
+/**
  可选 默认[UIFont systemFontOfSize:14]
  */
 @property (nonatomic , strong) UIFont * defaultTitleFont;
@@ -37,7 +47,7 @@
 @property (nonatomic , strong) UIColor * selectTitleColor;
 
 /**
- 可选 默认平分整个屏幕 最小60
+ 可选 默认平分整个屏幕  设置就按照设置的来
  */
 @property (nonatomic , assign) CGFloat  titleButtonWidth;
 
