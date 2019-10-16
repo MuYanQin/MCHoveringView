@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol MCHoveringListViewDelegate <NSObject>
 @required
 /**返回展示列表的tableView*/
-- (NSArray*)listView;
+- (NSArray<UIScrollView *> *)listView;
 //**必须设置的头部View*/
 - (UIView *)headView;
 

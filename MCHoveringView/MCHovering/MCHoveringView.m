@@ -8,13 +8,14 @@
 
 #import "MCHoveringView.h"
 #import "QQtableView.h"
-
-
+#import "MJRefresh.h"
 @interface MCHoveringView ()<UIScrollViewDelegate,MCPageViewDelegate>
 
 @property (nonatomic , assign) CGFloat  headHeight;
-/**x是否悬停了*/
+/**是否悬停了*/
 @property (nonatomic , assign) BOOL  isHover;
+/**是否时下拉了手还没送往上滑*/
+@property (nonatomic , assign) BOOL  isDragNORelease;
 
 @property (nonatomic , strong) QQtableView * visibleScrollView;
 @end
@@ -30,6 +31,7 @@
     self.headHeight = headView.frame.size.height;
     [self addSubview:self.scrollView];
     [self.scrollView addSubview:headView];
+    
     [self.scrollView addSubview:self.pageView];
     self.visibleScrollView = (QQtableView * )[self.delegate listView][0];
     self.visibleScrollView.canResponseMutiGesture = YES;
@@ -37,10 +39,15 @@
     self.visibleScrollView.scrollViewDidScroll = ^(UIScrollView *scrollView) {
         [weakSelf tableViewDidScroll:scrollView];
     };
-
     return self;
 }
+- (instancetype)initWithFrame:(CGRect)frame
+{
+    if (self = [super initWithFrame:frame]) {
 
+    }
+    return self;
+}
 - (MCPageView *)pageView
 {
     if (!_pageView) {
@@ -57,6 +64,7 @@
         _scrollView.showsVerticalScrollIndicator = NO;
         _scrollView.showsHorizontalScrollIndicator = NO;
         _scrollView.delegate = self;
+        
     }
     return _scrollView;
 }
@@ -65,43 +73,72 @@
 {
     if (scrollView == self.scrollView) {
         /**设置headView的位置*/
-        //偏移量大于等于某个值悬停
-        if (self.scrollView.contentOffset.y >= self.headHeight) {
+        //向上滑动偏移量大于等于某个值悬停
+        if (self.scrollView.contentOffset.y >= self.headHeight || self.isHover ) {
             self.scrollView.contentOffset = CGPointMake(0, self.headHeight);
             self.isHover = YES;
-        }else{
-            if (self.isHover) {
-                self.scrollView.contentOffset = CGPointMake(0, self.headHeight);
-            }
         }
-
-        if (self.isMidRefresh && self.visibleScrollView.contentOffset.y<=0 && scrollView.contentOffset.y <=0) {
-            self.scrollView.contentOffset = CGPointZero;
+        
+        if (self.isMidRefresh) {
+            if (self.visibleScrollView.contentOffset.y<=0 && scrollView.contentOffset.y <=0) {
+                self.scrollView.contentOffset = CGPointZero;
+            }else{
+                [self changeTabContentOffsetToZero:YES];
+            }
         }else{
-            /**设置下面列表的位置*/
-            if (self.scrollView.contentOffset.y < self.headHeight) {
-                if (!self.isHover) {
-                    //列表的便宜度都设置为零
-                    NSArray<UIScrollView *> *tem  = [self.delegate listView];
-                    for (UIScrollView *subS in tem) {
-                        subS.contentOffset = CGPointZero;
-                    }
+            [self changeTabContentOffsetToZero:NO];
+        }
+    }
+}
+- (void)changeTabContentOffsetToZero:(BOOL)midRefresh{
+    
+    if (self.isDragNORelease && midRefresh) {
+        self.scrollView.contentOffset = CGPointZero;
+    }
+    /**设置下面列表的位置*/
+    if (self.scrollView.contentOffset.y < self.headHeight) {
+        if (!self.isHover) {
+            //列表的便宜度都设置为零
+            NSArray<UIScrollView *> *tem  = [self.delegate listView];
+            for (UIScrollView *subS in tem) {
+                if (!self.isDragNORelease && midRefresh) {
+                    subS.contentOffset = CGPointZero;
                 }
             }
         }
     }
+
 }
 - (void)tableViewDidScroll:(UIScrollView *)scrollView
 {
-    if (self.isMidRefresh && scrollView.contentOffset.y <0 && !self.isHover  && self.scrollView.contentOffset.y<=0) {
-        self.scrollView.contentOffset = CGPointZero;
+
+    if(self.isMidRefresh){
+        if (scrollView.contentOffset.y <0 && !self.isHover  && self.scrollView.contentOffset.y<=0) {
+            self.scrollView.contentOffset = CGPointZero;
+            if (scrollView.contentOffset.y<-2) {
+                self.isDragNORelease = YES;
+            }
+        }else{
+            if (scrollView.contentOffset.y >=0) {
+                self.isDragNORelease = NO;
+            }
+            if (!self.isHover && !self.isDragNORelease) {
+                self.visibleScrollView.contentOffset = CGPointZero;
+            }
+            if (scrollView.contentOffset.y <=0 ) {
+                self.isHover = NO;
+            }else{
+                if (!self.isDragNORelease) {
+                    self.isHover = YES;
+                }
+            }
+        }
     }else{
         if (!self.isHover) {
             self.visibleScrollView.contentOffset = CGPointZero;
         }
         if (scrollView.contentOffset.y <=0) {
             self.isHover = NO;
-            scrollView.contentOffset = CGPointZero;
         }else{
             self.isHover = YES;
         }
