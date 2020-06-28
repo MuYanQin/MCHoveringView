@@ -29,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 @required
 /**返回展示列表的tableView*/
 - (NSArray<UIScrollView *> *)listView;
+
 //**必须设置的头部View*/
 - (UIView *)headView;
 

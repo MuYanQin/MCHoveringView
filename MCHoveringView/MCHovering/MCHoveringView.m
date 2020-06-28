@@ -153,5 +153,16 @@
         [weakSelf tableViewDidScroll:scrollView];
     };
 }
-
+- (void)startGestureRecognizer
+{
+    [self changeGesture:NO];
+}
+- (void)endGestureRecognizer
+{
+    [self changeGesture:YES];
+}
+- (void)changeGesture:(BOOL)can{
+    QQtableView *tablView = (QQtableView *)self.visibleScrollView;
+    tablView.canResponseMutiGesture = can;
+}
 @end

@@ -10,6 +10,10 @@
 @class MCPageView;
 @protocol MCPageViewDelegate <NSObject>
 - (void)MCPageView:(MCPageView *)MCPageView didSelectIndex:(NSInteger)Index;
+
+- (void)startGestureRecognizer;
+
+- (void)endGestureRecognizer;
 @end
 
 @interface MCPageView : UIView
@@ -17,8 +21,8 @@
 @property (nonatomic , assign) id<MCPageViewDelegate>  delegate;
 
 /**
-右边距离屏幕的距离 默认0
-*/
+ 右边距离屏幕的距离 默认0
+ */
 @property (nonatomic , assign) CGFloat  marginToRight;
 
 /**
@@ -56,6 +60,10 @@
  */
 @property (nonatomic , strong) UIColor * lineColor;
 
+/**
+可选 item下  横线的高度 默认 1
+*/
+@property (nonatomic , assign) CGFloat  lineHeight;
 
 /**
  可选 item下 横线的宽度相对于item宽度的比例。0～1 默认0.5
@@ -68,6 +76,16 @@
  */
 @property (nonatomic , assign) BOOL  canSlide;
 
+/**
+ 可选 设置头部滑动部分的高度
+ */
+@property (nonatomic , assign) CGFloat  titleViewHeight;
+
+
+/**
+ 可选 设置选中时候字体当大的倍数 0～1 默认0.2
+*/
+@property (nonatomic , assign) CGFloat  fontScale;
 
 /**
  可选 设置角标的数据
@@ -88,7 +106,7 @@
 
 /**
  可选 手动选中某个iem
-
+ 
  @param index item下标
  */
 - (void)selectIndex:(NSInteger)index;
@@ -98,10 +116,23 @@
  
  @param frame frame
  @param titles titleS数组
- @param controllers jiemian数组
+ @param controllers controller数组
  @return 实例
  */
 - (instancetype)initWithFrame:(CGRect)frame titles:(NSArray *)titles  controllers:(NSArray *)controllers;
+
+
+
+/**
+ 必选 实例化方法
+ 
+ @param frame frame
+ @param titles titleS数组
+ @param views view数组
+ @return 实例
+ */
+- (instancetype)initWithFrame:(CGRect)frame titles:(NSArray *)titles  views:(NSArray *)views;
+
 @end
 
 
