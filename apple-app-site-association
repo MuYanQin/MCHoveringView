@@ -1,0 +1,11 @@
+{
+    "applinks": {
+        "apps": [],
+        "details": [
+            {
+                "appID": "BRL3RYM3G2.com.herald.cn.crosscounty",
+                "paths": [ "/profile/*" ]
+            }
+        ]
+    }
+}
